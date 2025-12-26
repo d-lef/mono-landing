@@ -276,13 +276,58 @@
 
         .form-container iframe {
             width: min(90vw, 640px);
-            height: 400px;
+            height: min(80vh, 600px);
             border: none;
+            transition: opacity 0.3s ease;
         }
 
         .form-container.visible {
             opacity: 1;
             pointer-events: auto;
+        }
+
+        /* Comet loading spinner */
+        .comet-spinner {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            animation: comet-spin 1s linear infinite;
+        }
+
+        .comet-spinner::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            border-top-color: var(--text-secondary);
+            box-sizing: border-box;
+            mask: conic-gradient(from 0deg, transparent 0deg, black 90deg, transparent 90deg);
+            -webkit-mask: conic-gradient(from 0deg, transparent 0deg, black 90deg, transparent 90deg);
+        }
+
+        .comet-spinner::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(from -90deg, transparent 0deg, var(--text-secondary) 60deg, transparent 90deg);
+            mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px));
+            -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px));
+        }
+
+        @keyframes comet-spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .form-container.loaded .comet-spinner {
+            display: none;
+        }
+
+        .form-container:not(.loaded) iframe {
+            opacity: 0;
         }
 
     </style>
@@ -337,6 +382,7 @@
 
         <!-- Pre-order form section -->
         <div class="form-container">
+            <div class="comet-spinner"></div>
             <iframe
                 id="preorderForm"
                 data-src="https://docs.google.com/forms/d/e/1FAIpQLScNRNtOBAqSddr2QdIzM4lp0kgbmqkk8jys9NxMUHI474dEOg/viewform?embedded=true"
@@ -378,7 +424,12 @@
         const videoContainer = document.querySelector('.video-container');
         const formContainer = document.querySelector('.form-container');
         const formIframe = document.getElementById('preorderForm');
-        let formLoaded = false;
+
+        // Load form immediately
+        formIframe.src = formIframe.dataset.src;
+        formIframe.addEventListener('load', () => {
+            formContainer.classList.add('loaded');
+        });
 
         // States: 0 = nothing, 1 = group1, 2 = group2, 3 = video, 4 = form
         let currentState = 0;
@@ -401,11 +452,6 @@
                 group1.classList.add('visible');
             } else if (currentState === 2) {
                 group2.classList.add('visible');
-                // Preload form when user reaches state 2
-                if (!formLoaded) {
-                    formIframe.src = formIframe.dataset.src;
-                    formLoaded = true;
-                }
             } else if (currentState === 3) {
                 logo.classList.add('hidden');
                 videoContainer.classList.add('visible');
