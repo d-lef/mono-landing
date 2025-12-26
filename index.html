@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mono - Record from any app</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #252525;
+            --bg-secondary: #2D2D2D;
+            --bg-tertiary: #353535;
+            --accent: #E0E0E0;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --border: #404040;
+            --recording-red: #F44336;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Comfortaa', sans-serif;
+            font-weight: 300;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Hero Section - Full viewport, centered */
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Logo */
+        .logo {
+            font-size: clamp(48px, 12vw, 120px);
+            font-weight: 300;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            user-select: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+
+        body.loaded .logo {
+            opacity: 1;
+        }
+
+        /* Tagline container - holds swappable groups */
+        .tagline-container {
+            position: relative;
+            margin-top: 30px;
+            height: 50px;
+        }
+
+        .tagline-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        .tagline-group.visible {
+            opacity: 1;
+        }
+
+        .tagline {
+            text-align: center;
+            font-size: clamp(14px, 2vw, 20px);
+            color: var(--text-secondary);
+            line-height: 1.4;
+            margin: 0;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            animation: bounce 2s ease-in-out infinite;
+            transition: opacity 0.5s ease;
+        }
+
+        body.loaded .scroll-indicator {
+            opacity: 0.4;
+        }
+
+        .scroll-indicator svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--text-secondary);
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(8px); }
+        }
+
+        /* Hide scroll indicator when scrolling */
+        .scroll-indicator.hidden {
+            opacity: 0 !important;
+            pointer-events: none;
+        }
+
+        /* Mobile styles */
+        @media (max-width: 600px) {
+            .content {
+                padding: 0 20px;
+            }
+
+            .tagline-container {
+                height: 80px;
+            }
+
+            .tagline-group {
+                white-space: normal;
+                width: 100%;
+            }
+
+            .tagline {
+                white-space: normal;
+                font-size: clamp(14px, 4vw, 18px);
+            }
+
+            .scroll-indicator {
+                bottom: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <div class="content">
+            <div class="logo">mono</div>
+
+            <div class="tagline-container">
+                <div class="tagline-group group-1">
+                    <p class="tagline">For people who want to record from any app</p>
+                    <p class="tagline">and manage recordings in one place</p>
+                </div>
+                <div class="tagline-group group-2">
+                    <p class="tagline">No subscription culture.</p>
+                    <p class="tagline">AI features with one-time payment of 50 euros</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="scroll-indicator">
+            <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 5v14M5 12l7 7 7-7"/>
+            </svg>
+        </div>
+    </section>
+
+    <script>
+        // Wait for font to load before showing content
+        document.fonts.ready.then(() => {
+            document.body.classList.add('loaded');
+        });
+
+        const group1 = document.querySelector('.group-1');
+        const group2 = document.querySelector('.group-2');
+        const scrollIndicator = document.querySelector('.scroll-indicator');
+
+        // States: 0 = nothing, 1 = group1, 2 = group2
+        let currentState = 0;
+        let lastScrollTime = 0;
+        const scrollCooldown = 800; // ms between scroll actions
+
+        function updateVisibility() {
+            group1.classList.remove('visible');
+            group2.classList.remove('visible');
+
+            if (currentState === 1) {
+                group1.classList.add('visible');
+            } else if (currentState === 2) {
+                group2.classList.add('visible');
+            }
+
+        }
+
+        // One scroll = one state change
+        window.addEventListener('wheel', (e) => {
+            e.preventDefault();
+
+            const now = Date.now();
+            if (now - lastScrollTime < scrollCooldown) return;
+            lastScrollTime = now;
+
+            if (e.deltaY > 0 && currentState < 2) {
+                currentState++;
+            } else if (e.deltaY < 0 && currentState > 0) {
+                currentState--;
+            }
+
+            updateVisibility();
+        }, { passive: false });
+
+        // Touch support for mobile
+        let touchStartY = 0;
+        let lastTouchTime = 0;
+
+        window.addEventListener('touchstart', (e) => {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+
+        window.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchTime < scrollCooldown) return;
+
+            const deltaY = touchStartY - e.changedTouches[0].clientY;
+            if (deltaY > 50 && currentState < 2) {
+                lastTouchTime = now;
+                currentState++;
+                updateVisibility();
+            } else if (deltaY < -50 && currentState > 0) {
+                lastTouchTime = now;
+                currentState--;
+                updateVisibility();
+            }
+        }, { passive: true });
+    </script>
+</body>
+</html>
