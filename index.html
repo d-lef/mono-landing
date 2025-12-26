@@ -223,6 +223,41 @@
             :root:not(.dark) .theme-toggle .icon-moon { display: block; }
         }
 
+        /* Logo visibility transition */
+        .logo {
+            transition: opacity 0.3s ease;
+        }
+
+        .logo.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* YouTube container */
+        .video-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: min(80vw, 640px);
+            aspect-ratio: 16 / 9;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .video-container.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .video-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 12px;
+        }
+
     </style>
 </head>
 <body>
@@ -261,6 +296,17 @@
                 </div>
             </div>
         </div>
+
+        <!-- YouTube video section -->
+        <div class="video-container">
+            <iframe
+                src="https://www.youtube.com/embed/mSX3OyW9Rao?rel=0"
+                title="mono demo"
+                referrerpolicy="strict-origin-when-cross-origin"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen>
+            </iframe>
+        </div>
     </section>
 
     <script>
@@ -292,8 +338,10 @@
         const group1 = document.querySelector('.group-1');
         const group2 = document.querySelector('.group-2');
         const scrollIndicator = document.querySelector('.scroll-indicator');
+        const logo = document.querySelector('.logo');
+        const videoContainer = document.querySelector('.video-container');
 
-        // States: 0 = nothing, 1 = group1, 2 = group2
+        // States: 0 = nothing, 1 = group1, 2 = group2, 3 = video
         let currentState = 0;
         let isLocked = false;
         let settleTimeout = null;
@@ -304,6 +352,8 @@
             group1.classList.remove('visible');
             group2.classList.remove('visible');
             scrollIndicator.classList.remove('visible');
+            logo.classList.remove('hidden');
+            videoContainer.classList.remove('visible');
 
             if (currentState === 0) {
                 scrollIndicator.classList.add('visible');
@@ -311,6 +361,9 @@
                 group1.classList.add('visible');
             } else if (currentState === 2) {
                 group2.classList.add('visible');
+            } else if (currentState === 3) {
+                logo.classList.add('hidden');
+                videoContainer.classList.add('visible');
             }
         }
 
@@ -333,7 +386,7 @@
             }
 
             // Change state
-            if (e.deltaY > 5 && currentState < 2) {
+            if (e.deltaY > 5 && currentState < 3) {
                 currentState++;
                 updateVisibility();
                 isLocked = true;
@@ -364,7 +417,7 @@
 
         window.addEventListener('touchend', (e) => {
             const deltaY = touchStartY - e.changedTouches[0].clientY;
-            if (deltaY > 50 && currentState < 2) {
+            if (deltaY > 50 && currentState < 3) {
                 currentState++;
                 updateVisibility();
             } else if (deltaY < -50 && currentState > 0) {
