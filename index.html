@@ -6,7 +6,7 @@
     <title>mono - Record from any app</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -30,7 +30,7 @@
         }
 
         body {
-            font-family: 'Comfortaa', sans-serif;
+            font-family: 'Quicksand', sans-serif;
             font-weight: 300;
             background-color: var(--bg-primary);
             color: var(--text-primary);
@@ -173,8 +173,8 @@
 
         // States: 0 = nothing, 1 = group1, 2 = group2
         let currentState = 0;
-        let lastScrollTime = 0;
-        const scrollCooldown = 800; // ms between scroll actions
+        let isLocked = false;
+        let unlockTimeout = null;
 
         function updateVisibility() {
             group1.classList.remove('visible');
@@ -185,24 +185,30 @@
             } else if (currentState === 2) {
                 group2.classList.add('visible');
             }
-
         }
 
-        // One scroll = one state change
+        // One scroll gesture = one state change
+        // Unlock only after scroll stops (no wheel events for 1ms)
         window.addEventListener('wheel', (e) => {
             e.preventDefault();
 
-            const now = Date.now();
-            if (now - lastScrollTime < scrollCooldown) return;
-            lastScrollTime = now;
+            // Reset unlock timer on EVERY wheel event
+            if (unlockTimeout) clearTimeout(unlockTimeout);
+            unlockTimeout = setTimeout(() => {
+                isLocked = false;
+            }, 100);
 
-            if (e.deltaY > 0 && currentState < 2) {
+            if (isLocked) return;
+
+            if (e.deltaY > 5 && currentState < 2) {
+                isLocked = true;
                 currentState++;
-            } else if (e.deltaY < 0 && currentState > 0) {
+                updateVisibility();
+            } else if (e.deltaY < -5 && currentState > 0) {
+                isLocked = true;
                 currentState--;
+                updateVisibility();
             }
-
-            updateVisibility();
         }, { passive: false });
 
         // Touch support for mobile
