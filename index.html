@@ -18,6 +18,8 @@
         :root {
             --bg-primary: #252525;
             --bg-secondary: #2D2D2D;
+            --bg-hover: #3A3A3A;
+            --bg-pressed: #454545;
             --accent: #E0E0E0;
             --text-primary: #FFFFFF;
             --text-secondary: #B0B0B0;
@@ -28,6 +30,8 @@
             :root:not(.dark) {
                 --bg-primary: #F5F5F5;
                 --bg-secondary: #FFFFFF;
+                --bg-hover: #E0E0E0;
+                --bg-pressed: #D0D0D0;
                 --accent: #424242;
                 --text-primary: #212121;
                 --text-secondary: #757575;
@@ -38,6 +42,8 @@
         :root.light {
             --bg-primary: #F5F5F5;
             --bg-secondary: #FFFFFF;
+            --bg-hover: #E0E0E0;
+            --bg-pressed: #D0D0D0;
             --accent: #424242;
             --text-primary: #212121;
             --text-secondary: #757575;
@@ -179,15 +185,18 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background-color 0.15s ease;
         }
 
         .theme-toggle:hover {
-            background-color: var(--bg-secondary);
+            background-color: var(--bg-hover);
         }
 
         .theme-toggle:active {
-            background-color: var(--bg-secondary);
+            background-color: var(--bg-pressed);
+        }
+
+        .theme-toggle:not(:active):not(:hover) {
+            transition: background-color 0.15s ease;
         }
 
         .theme-toggle svg {
