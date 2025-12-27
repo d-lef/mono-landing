@@ -230,6 +230,7 @@
 
         .logo.hidden {
             opacity: 0;
+            visibility: hidden;
             pointer-events: none;
         }
 
@@ -286,12 +287,12 @@
             pointer-events: auto;
         }
 
-        /* Comet loading spinner */
+        /* Comet loading spinner - matches app animation */
         .comet-spinner {
             position: absolute;
             width: 70px;
             height: 70px;
-            animation: comet-spin 1s linear infinite;
+            animation: comet-spin 1.5s linear infinite;
         }
 
         .comet-spinner::before {
@@ -300,22 +301,20 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 3px solid transparent;
-            border-top-color: var(--text-secondary);
-            box-sizing: border-box;
-            mask: conic-gradient(from 0deg, transparent 0deg, black 90deg, transparent 90deg);
-            -webkit-mask: conic-gradient(from 0deg, transparent 0deg, black 90deg, transparent 90deg);
-        }
-
-        .comet-spinner::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            background: conic-gradient(from -90deg, transparent 0deg, var(--text-secondary) 60deg, transparent 90deg);
-            mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px));
-            -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px));
+            /* Conic gradient creates fading tail effect (~96 degrees, matching app's 12 segments * 8 degrees) */
+            background: conic-gradient(
+                from 0deg,
+                transparent 0deg,
+                transparent 264deg,
+                color-mix(in srgb, var(--text-secondary) 16%, transparent) 288deg,
+                color-mix(in srgb, var(--text-secondary) 36%, transparent) 312deg,
+                color-mix(in srgb, var(--text-secondary) 64%, transparent) 336deg,
+                var(--text-secondary) 352deg,
+                var(--text-secondary) 360deg
+            );
+            /* Mask to create 3px ring stroke */
+            mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px), black 100%, transparent 100%);
+            -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), black calc(100% - 3px), black 100%, transparent 100%);
         }
 
         @keyframes comet-spin {
@@ -327,7 +326,7 @@
         }
 
         .form-container:not(.loaded) iframe {
-            opacity: 0;
+            visibility: hidden;
         }
 
         /* Home button - hidden by default */
@@ -502,7 +501,6 @@
             group1.classList.remove('visible');
             group2.classList.remove('visible');
             scrollIndicator.classList.remove('visible');
-            logo.classList.remove('hidden');
             videoContainer.classList.remove('visible');
             formContainer.classList.remove('visible');
 
@@ -512,19 +510,22 @@
 
             if (currentState === 0) {
                 scrollIndicator.classList.add('visible');
+                logo.classList.remove('hidden');
             } else if (currentState === 1) {
                 group1.classList.add('visible');
+                logo.classList.remove('hidden');
             } else if (currentState === 2) {
                 group2.classList.add('visible');
+                logo.classList.remove('hidden');
             } else if (currentState === 3) {
                 logo.classList.add('hidden');
                 videoContainer.classList.add('visible');
             } else if (currentState === 4) {
                 logo.classList.add('hidden');
-                formContainer.classList.add('visible');
                 // Reload iframe to reset scroll position on mobile
                 formContainer.classList.remove('loaded');
                 formIframe.src = formIframe.dataset.src;
+                formContainer.classList.add('visible');
             }
         }
 
