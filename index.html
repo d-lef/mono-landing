@@ -383,7 +383,7 @@
             visibility: hidden;
         }
 
-        /* Home button - hidden by default */
+        /* Home button - always visible, centered between theme and language */
         .home-button {
             position: fixed;
             top: 20px;
@@ -396,7 +396,7 @@
             border-radius: 8px;
             background: transparent;
             cursor: pointer;
-            display: none;
+            display: flex;
             align-items: center;
             justify-content: center;
         }
@@ -419,16 +419,7 @@
             stroke-linejoin: round;
         }
 
-        /* Mobile: show home button and hide theme toggle at state 4 */
-        @media (max-width: 768px) {
-            body.state-4 .theme-toggle {
-                display: none !important;
-            }
-            body.state-4 .home-button {
-                display: flex !important;
-            }
-        }
-
+        
         /* Language selector */
         .lang-selector {
             position: fixed;
@@ -509,13 +500,6 @@
         /* Move theme toggle left to make room */
         .theme-toggle {
             left: calc(50% - 44px);
-        }
-
-        /* Mobile: hide language selector at state 4 */
-        @media (max-width: 768px) {
-            body.state-4 .lang-selector {
-                display: none !important;
-            }
         }
 
     </style>
