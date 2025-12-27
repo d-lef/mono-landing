@@ -12,7 +12,9 @@
       "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" remote set-url origin https://github.com/d-lef/mono-app.git)",
       "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" remote:*)",
       "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" commit -m \"$\\(cat <<''EOF''\nMake video larger on desktop\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" commit -m \"$\\(cat <<''EOF''\nAdd Google Analytics tracking\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" commit -m \"$\\(cat <<''EOF''\nAdd Google Analytics tracking\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" add -A)",
+      "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" commit -m \"$\\(cat <<''EOF''\nAdd favicon\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }
