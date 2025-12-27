@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" status)",
+      "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" diff)",
+      "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" log --oneline -5)",
+      "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" add index.html)",
+      "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" commit -m \"$\\(cat <<''EOF''\nMatch comet spinner to app animation and fix UI issues\n\n- Update comet spinner: 1.5s rotation, 96deg tail with fading opacity\n- Fix form iframe flash by using visibility:hidden instead of opacity\n- Fix logo flickering between video/form slides\n- Reload form iframe on show to reset scroll position\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" push)",
+      "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" commit -m \"$\\(cat <<''EOF''\nUpdate demo video\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(gh repo rename:*)",
+      "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" remote set-url origin https://github.com/d-lef/mono-app.git)",
+      "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" remote:*)",
+      "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" commit -m \"$\\(cat <<''EOF''\nMake video larger on desktop\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C \"C:\\\\Users\\\\d.lefanov\\\\Mono\\\\website\" commit -m \"$\\(cat <<''EOF''\nAdd Google Analytics tracking\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+    ]
+  }
+}
