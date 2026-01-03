@@ -246,13 +246,24 @@
                 top: 45%;
             }
 
-            /* Tighter table on mobile */
+            /* Tighter table on mobile with text wrapping */
+            .compare-table {
+                max-width: 95vw;
+            }
+
             .compare-table td {
                 padding: 4px 8px;
             }
 
+            .compare-table .them,
+            .compare-table .us {
+                white-space: normal;
+                word-wrap: break-word;
+            }
+
             .compare-table .vs {
                 padding: 4px 10px;
+                white-space: nowrap;
             }
 
             .compare-table .category {
