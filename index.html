@@ -114,6 +114,8 @@
             color: var(--text-primary);
             height: 100vh;
             overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         /* Hero Section - Full viewport, centered */
@@ -156,6 +158,24 @@
             line-height: 1;
         }
 
+        .logo-subtitle {
+            font-size: clamp(14px, 3vw, 20px);
+            color: var(--text-secondary);
+            margin-top: 16px;
+            letter-spacing: 0.05em;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        body.loaded .logo-subtitle {
+            opacity: 1;
+        }
+
+        .logo-subtitle.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
         .filled-o {
             width: 0.52em;
             height: 0.52em;
@@ -166,8 +186,10 @@
 
         /* Tagline container - holds swappable groups */
         .tagline-container {
-            position: relative;
-            margin-top: 30px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             height: 50px;
         }
 
@@ -201,6 +223,7 @@
         /* Scroll indicator */
         .scroll-indicator {
             position: absolute;
+            bottom: 15%;
             left: 50%;
             transform: translateX(-50%);
             opacity: 0;
@@ -277,15 +300,27 @@
             :root:not(.dark) .theme-toggle .icon-moon { display: block; }
         }
 
-        /* Logo visibility transition */
-        .logo {
-            transition: opacity 0.3s ease;
+        /* Logo group - container for logo and subtitle */
+        .logo-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.5s ease, opacity 0.3s ease;
         }
 
-        .logo.hidden {
+        .logo-group.at-top {
+            transform: translateY(-28vh) scale(0.4);
+        }
+
+        .logo-group.hidden {
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
+        }
+
+        /* Logo */
+        .logo {
+            transition: opacity 0.3s ease;
         }
 
         /* YouTube container */
@@ -560,19 +595,23 @@
 
     <section class="hero">
         <div class="content">
-            <div class="logo">
-                <div class="logo-char">m</div>
-                <div class="logo-char"><span class="filled-o"></span></div>
-                <div class="logo-char">n</div>
-                <div class="logo-char"><span class="filled-o"></span></div>
+            <div class="logo-group">
+                <div class="logo">
+                    <div class="logo-char">m</div>
+                    <div class="logo-char"><span class="filled-o"></span></div>
+                    <div class="logo-char">n</div>
+                    <div class="logo-char"><span class="filled-o"></span></div>
+                </div>
+                <p class="logo-subtitle">Record meetings from any app</p>
+            </div>
+
+            <div class="scroll-indicator">
+                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 5v14M5 12l7 7 7-7"/>
+                </svg>
             </div>
 
             <div class="tagline-container">
-                <div class="scroll-indicator">
-                    <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 5v14M5 12l7 7 7-7"/>
-                    </svg>
-                </div>
                 <div class="tagline-group group-1">
                     <p class="tagline">For people who want to record meetings from any app</p>
                     <p class="tagline">and manage recordings in one place</p>
@@ -637,7 +676,8 @@
         const group1 = document.querySelector('.group-1');
         const group2 = document.querySelector('.group-2');
         const scrollIndicator = document.querySelector('.scroll-indicator');
-        const logo = document.querySelector('.logo');
+        const logoGroup = document.querySelector('.logo-group');
+        const logoSubtitle = document.querySelector('.logo-subtitle');
         const videoContainer = document.querySelector('.video-container');
         const formContainer = document.querySelector('.form-container');
         const formIframe = document.getElementById('preorderForm');
@@ -675,18 +715,24 @@
 
             if (currentState === 0) {
                 scrollIndicator.classList.add('visible');
-                logo.classList.remove('hidden');
+                logoGroup.classList.remove('hidden', 'at-top');
             } else if (currentState === 1) {
+                scrollIndicator.classList.add('visible');
                 group1.classList.add('visible');
-                logo.classList.remove('hidden');
+                logoGroup.classList.remove('hidden');
+                logoGroup.classList.add('at-top');
             } else if (currentState === 2) {
+                scrollIndicator.classList.add('visible');
                 group2.classList.add('visible');
-                logo.classList.remove('hidden');
+                logoGroup.classList.remove('hidden');
+                logoGroup.classList.add('at-top');
             } else if (currentState === 3) {
-                logo.classList.add('hidden');
+                logoGroup.classList.remove('hidden');
+                logoGroup.classList.add('at-top');
                 videoContainer.classList.add('visible');
             } else if (currentState === 4) {
-                logo.classList.add('hidden');
+                logoGroup.classList.remove('hidden');
+                logoGroup.classList.add('at-top');
                 // Reload iframe to reset scroll position on mobile
                 formContainer.classList.remove('loaded');
                 // Use language-specific form if available
@@ -773,9 +819,34 @@
             }
         });
 
+        // Keyboard navigation (up/down arrows)
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+            if (isLocked) return;
+
+            e.preventDefault();
+
+            if (e.key === 'ArrowDown' && currentState < 4) {
+                currentState++;
+                updateVisibility();
+                isLocked = true;
+                setTimeout(() => {
+                    isLocked = false;
+                }, animationTime);
+            } else if (e.key === 'ArrowUp' && currentState > 0) {
+                currentState--;
+                updateVisibility();
+                isLocked = true;
+                setTimeout(() => {
+                    isLocked = false;
+                }, animationTime);
+            }
+        });
+
         // Language support
         const translations = {
             en: {
+                subtitle: "Record meetings from any app",
                 tagline1a: "For people who want to record meetings from any app",
                 tagline1b: "and manage recordings in one place",
                 tagline2a: "No-subscription culture:",
@@ -785,6 +856,7 @@
                 form: "https://docs.google.com/forms/d/e/1FAIpQLScNRNtOBAqSddr2QdIzM4lp0kgbmqkk8jys9NxMUHI474dEOg/viewform?embedded=true"
             },
             es: {
+                subtitle: "Graba reuniones desde cualquier app",
                 tagline1a: "Para quienes quieren grabar reuniones desde cualquier app",
                 tagline1b: "y gestionar todo en un solo lugar",
                 tagline2a: "Sin suscripciones:",
@@ -794,6 +866,7 @@
                 form: null
             },
             ru: {
+                subtitle: "Записывай встречи из любого приложения",
                 tagline1a: "Для тех, кто хочет записывать встречи из любого приложения",
                 tagline1b: "и хранить всё в одном месте",
                 tagline2a: "Без подписок:",
@@ -803,6 +876,7 @@
                 form: "https://docs.google.com/forms/d/e/1FAIpQLScA8fL2bafFns89Bj_AMxNWCUrw4Cwn5FixRJeQ9Xs29zJGMQ/viewform?embedded=true"
             },
             fr: {
+                subtitle: "Enregistrez vos réunions depuis n'importe quelle app",
                 tagline1a: "Pour ceux qui veulent enregistrer leurs réunions depuis n'importe quelle app",
                 tagline1b: "et tout gérer au même endroit",
                 tagline2a: "Zéro abonnement :",
@@ -812,6 +886,7 @@
                 form: null
             },
             de: {
+                subtitle: "Meetings aus jeder App aufnehmen",
                 tagline1a: "Für alle, die Meetings aus jeder App aufnehmen wollen",
                 tagline1b: "und alles an einem Ort verwalten",
                 tagline2a: "Ohne Abo:",
@@ -821,6 +896,7 @@
                 form: null
             },
             zh: {
+                subtitle: "录制会议，来自任何应用",
                 tagline1a: "录制会议，来自任何应用",
                 tagline1b: "一处管理，井井有条",
                 tagline2a: "告别订阅：",
@@ -864,6 +940,7 @@
                 const t = translations[lang];
 
                 // Update text
+                logoSubtitle.textContent = t.subtitle;
                 tagline1a.textContent = t.tagline1a;
                 tagline1b.textContent = t.tagline1b;
                 tagline2a.textContent = t.tagline2a;
