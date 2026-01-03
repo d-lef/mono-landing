@@ -187,7 +187,7 @@
         /* Tagline container - holds swappable groups */
         .tagline-container {
             position: absolute;
-            top: 50%;
+            top: 55%;
             left: 50%;
             transform: translate(-50%, -50%);
             height: 50px;
@@ -201,8 +201,9 @@
             opacity: 0;
             transition: opacity 0.25s ease;
             position: absolute;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translate(-50%, -50%);
             white-space: nowrap;
         }
 
@@ -220,10 +221,10 @@
             white-space: nowrap;
         }
 
-        /* Scroll indicator */
+        /* Scroll indicator - positioned just below logo */
         .scroll-indicator {
             position: absolute;
-            bottom: 15%;
+            bottom: 30%;
             left: 50%;
             transform: translateX(-50%);
             opacity: 0;
@@ -233,12 +234,12 @@
 
         @media (max-width: 768px) {
             .scroll-indicator {
-                bottom: 28%;
+                bottom: 27%;
             }
 
             /* Shift content up to visually center below nav bar */
             .logo-group {
-                margin-top: -15vh;
+                margin-top: -10vh;
             }
         }
 
@@ -772,8 +773,11 @@
         // States: 0 = nothing, 1 = group1, 2 = group2, 3 = group3 (positioning), 4 = video, 5 = form
         let currentState = 0;
 
-        // Scroll cooldown - prevents multiple triggers from one gesture
-        let scrollSessionActive = false;
+        // Scroll handling - fixed cooldown + higher threshold after cooldown
+        let lastTriggerTime = 0;
+        const SCROLL_COOLDOWN = 600; // Fixed cooldown in ms
+        const INITIAL_THRESHOLD = 10; // deltaY threshold for first trigger
+        const RETRIGGER_THRESHOLD = 40; // Higher threshold after cooldown (filters weak kinetic events)
 
         function updateVisibility() {
             group1.classList.remove('visible');
@@ -791,17 +795,14 @@
                 scrollIndicator.classList.add('visible');
                 logoGroup.classList.remove('hidden', 'at-top');
             } else if (currentState === 1) {
-                scrollIndicator.classList.add('visible');
                 group1.classList.add('visible');
                 logoGroup.classList.remove('hidden');
                 logoGroup.classList.add('at-top');
             } else if (currentState === 2) {
-                scrollIndicator.classList.add('visible');
                 group2.classList.add('visible');
                 logoGroup.classList.remove('hidden');
                 logoGroup.classList.add('at-top');
             } else if (currentState === 3) {
-                scrollIndicator.classList.add('visible');
                 group3.classList.add('visible');
                 logoGroup.classList.remove('hidden');
                 logoGroup.classList.add('at-top');
@@ -827,83 +828,89 @@
             updateVisibility();
         });
 
-        // Scroll handling: one state change, then fixed cooldown (not reset by kinetic scroll)
+        // Scroll handling: fixed cooldown + higher threshold for retrigger
         window.addEventListener('wheel', (e) => {
             e.preventDefault();
-            if (scrollSessionActive) return; // Ignore during cooldown
 
-            // Need minimum delta to trigger
-            if (Math.abs(e.deltaY) < 10) return;
+            const now = Date.now();
+            const timeSinceTrigger = now - lastTriggerTime;
+            const inCooldown = timeSinceTrigger < SCROLL_COOLDOWN;
+
+            // During cooldown, ignore all scroll events
+            if (inCooldown) return;
+
+            // After cooldown, require higher threshold (filters dying kinetic scroll)
+            const threshold = lastTriggerTime === 0 ? INITIAL_THRESHOLD : RETRIGGER_THRESHOLD;
+            if (Math.abs(e.deltaY) < threshold) return;
 
             if (e.deltaY > 0 && currentState < 5) {
                 currentState++;
                 updateVisibility();
-                scrollSessionActive = true;
-                setTimeout(() => { scrollSessionActive = false; }, 350);
+                lastTriggerTime = now;
             } else if (e.deltaY < 0 && currentState > 0) {
                 currentState--;
                 updateVisibility();
-                scrollSessionActive = true;
-                setTimeout(() => { scrollSessionActive = false; }, 350);
+                lastTriggerTime = now;
             }
         }, { passive: false });
 
         // Touch support for mobile
         let touchStartY = 0;
-        let touchLocked = false;
+        let lastTouchTrigger = 0;
 
         window.addEventListener('touchstart', (e) => {
             touchStartY = e.touches[0].clientY;
         }, { passive: true });
 
         window.addEventListener('touchend', (e) => {
-            if (touchLocked) return;
+            const now = Date.now();
+            if (now - lastTouchTrigger < 400) return;
+
             const deltaY = touchStartY - e.changedTouches[0].clientY;
             if (deltaY > 50 && currentState < 5) {
                 currentState++;
                 updateVisibility();
-                touchLocked = true;
-                setTimeout(() => { touchLocked = false; }, 400);
+                lastTouchTrigger = now;
             } else if (deltaY < -50 && currentState > 0) {
                 currentState--;
                 updateVisibility();
-                touchLocked = true;
-                setTimeout(() => { touchLocked = false; }, 400);
+                lastTouchTrigger = now;
             }
         }, { passive: true });
 
         // Click to advance (like scrolling down)
-        let clickLocked = false;
+        let lastClickTrigger = 0;
         document.addEventListener('click', (e) => {
             // Don't trigger on buttons or iframes
             if (e.target.closest('button, iframe, a, .lang-selector')) return;
-            if (clickLocked) return;
+
+            const now = Date.now();
+            if (now - lastClickTrigger < 400) return;
 
             if (currentState < 5) {
                 currentState++;
                 updateVisibility();
-                clickLocked = true;
-                setTimeout(() => { clickLocked = false; }, 400);
+                lastClickTrigger = now;
             }
         });
 
         // Keyboard navigation (up/down arrows)
-        let keyLocked = false;
+        let lastKeyTrigger = 0;
         document.addEventListener('keydown', (e) => {
             if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-            if (keyLocked) return;
             e.preventDefault();
+
+            const now = Date.now();
+            if (now - lastKeyTrigger < 400) return;
 
             if (e.key === 'ArrowDown' && currentState < 5) {
                 currentState++;
                 updateVisibility();
-                keyLocked = true;
-                setTimeout(() => { keyLocked = false; }, 400);
+                lastKeyTrigger = now;
             } else if (e.key === 'ArrowUp' && currentState > 0) {
                 currentState--;
                 updateVisibility();
-                keyLocked = true;
-                setTimeout(() => { keyLocked = false; }, 400);
+                lastKeyTrigger = now;
             }
         });
 
